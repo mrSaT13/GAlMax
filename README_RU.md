@@ -32,7 +32,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 ### Скриншоты
 
-> Добавьте скриншоты в `assets/screenshots/` и прилинкуйте здесь.
+> Добавить скриншоты в `assets/screenshots/` .
 
 ### Быстрый старт
 
