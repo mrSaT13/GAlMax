@@ -17,13 +17,14 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+      - uses: mikefarah/yq@v4
       - uses: subosito/flutter-action@v2
         with:
           flutter-version-file: .tool_versions.yaml
       - uses: dtolnay/rust-toolchain@stable
       - run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
       - name: Prepare web
-        run: ./scripts/prepare-web.sh
+        run: bash ./scripts/prepare-web.sh
       - run: rm ./assets/vodozemac/.gitignore
       - run: flutter pub get
       - name: Build Release Web
@@ -38,6 +39,7 @@ jobs:
           destination_dir: nightly
 
   deploy_playstore_internal:
+    if: false # disabled for public repo (requires FDROID/PLAY secrets)
     runs-on: ubuntu-latest
     concurrency:
       group: deploy_playstore

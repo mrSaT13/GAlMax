@@ -32,15 +32,21 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/Icon-32.png">
   <link rel="icon" type="image/png" sizes="48x48" href="icons/Icon-48.png">
 
-  <title>GAlMax</title>
+  <title>GAlMax — Demo</title>
   <link rel="manifest" href="manifest.json">
   <script src="Imaging.js"></script>
+  <style>
+    #demo-banner{position:fixed;top:0;left:0;right:0;z-index:9999;background:#2E7D32;color:#fff;text-align:center;font:12px/1.4 system-ui;padding:6px 8px}
+    #demo-banner a{color:#fff;text-decoration:underline}
+    body{padding-top:28px}
+  </style>
 
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
 
 <body>
+  <div id="demo-banner">⚠️ Demo nightly — not for production. Do not use real credentials. <a href="https://github.com/mrSaT13/GAlMax">GitHub</a></div>
   <script>
     window.addEventListener('load', function (ev) {
       {{flutter_js}}

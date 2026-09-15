@@ -19,7 +19,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 Безопасный Matrix-клиент со сквозным шифрованием и звонками — форк [FluffyChat](https://github.com/krille-chan/fluffychat).
 
-> **App ID:** `im.galmax.app` · **Лицензия:** `AGPL-3.0-or-later` · **Платформы:** Android, Web 
+> **App ID:** `im.galmax.app` · **Лицензия:** `AGPL-3.0-or-later` · **Платформы:** Android, Web
+
+> ⚠️ **Демо** [mrSaT13.github.io/GAlMax/nightly](https://mrSaT13.github.io/GAlMax/nightly/) — nightly-сборка только для предпросмотра, не используйте реальные пароли. Данные хранятся на вашем Matrix-сервере, а не на GitHub Pages.
 
 ---
 

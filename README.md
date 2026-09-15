@@ -21,6 +21,8 @@ Secure Matrix client with end-to-end encryption and calls — fork of [FluffyCha
 
 > **App ID:** `im.galmax.app` · **License:** `AGPL-3.0-or-later` · **Platforms:** Android, Web
 
+> ⚠️ **Demo** [mrSaT13.github.io/GAlMax/nightly](https://mrSaT13.github.io/GAlMax/nightly/) is a nightly build for preview only — do not use real credentials. Data lives on your Matrix homeserver, not on GitHub Pages.
+
 ---
 
 ### Features
