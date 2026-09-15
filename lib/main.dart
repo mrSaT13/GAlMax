@@ -1,0 +1,173 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to galmax
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import 'dart:isolate';
+import 'dart:ui';
+
+import 'package:collection/collection.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:galmax/config/app_config.dart';
+import 'package:galmax/pages/chat/scheduled_messages.dart';
+import 'package:galmax/utils/background_sync.dart';
+import 'package:galmax/utils/client_manager.dart';
+import 'package:galmax/utils/notification_background_handler.dart';
+import 'package:galmax/utils/platform_infos.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
+import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/universal_html.dart' as web;
+
+import 'config/setting_keys.dart';
+import 'utils/background_push.dart';
+import 'widgets/galmax_app.dart';
+
+ReceivePort? mainIsolateReceivePort;
+
+bool _vodozemacInitialized = false;
+
+bool isIntegrationTest = false;
+
+void main(List<String> args) async {
+  isIntegrationTest = args.singleOrNull == 'integration_test';
+  if (PlatformInfos.isAndroid) {
+    final port = mainIsolateReceivePort = ReceivePort();
+    IsolateNameServer.removePortNameMapping(AppConfig.mainIsolatePortName);
+    IsolateNameServer.registerPortWithName(
+      port.sendPort,
+      AppConfig.mainIsolatePortName,
+    );
+    await waitForPushIsolateDone();
+  }
+
+  // Sanitize hash for OIDC:
+  if (kIsWeb) {
+    final hash = web.window.location.hash;
+    if (hash.isNotEmpty && !hash.startsWith('/')) {
+      web.window.location.hash = hash.replaceFirst('#', '#?');
+    }
+  }
+
+  // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
+  // To make sure that the parts of flutter needed are started up already, we need to ensure that the
+  // widget bindings are initialized already.
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase if available
+  if (PlatformInfos.isAndroid || PlatformInfos.isIOS) {
+    try {
+      await Firebase.initializeApp();
+      Logs().v('Firebase initialized successfully');
+    } catch (e) {
+      Logs().w('Firebase initialization failed (non-critical)', e);
+    }
+  }
+
+  final store = await AppSettings.init();
+  Logs().i('Welcome to ${AppSettings.applicationName.value} <3');
+
+  if (!_vodozemacInitialized) {
+    await vod.init(wasmPath: './assets/assets/vodozemac/');
+    _vodozemacInitialized = true;
+  }
+
+  Logs().nativeColors = !PlatformInfos.isIOS;
+  final clients = await ClientManager.getClients(store: store);
+
+  // If the app starts in detached mode, we assume that it is in
+  // background fetch mode for processing push notifications. This is
+  // currently only supported on Android.
+  if (PlatformInfos.isAndroid &&
+      AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState) {
+    // Do not send online presences when app is in background fetch mode.
+    for (final client in clients) {
+      client.backgroundSync = false;
+      client.syncPresence = PresenceType.offline;
+    }
+
+    // In the background fetch mode we do not want to waste ressources with
+    // starting the Flutter engine but process incoming push notifications.
+    BackgroundPush.clientOnly(clients);
+    // To start the flutter engine afterwards we add an custom observer.
+    WidgetsBinding.instance.addObserver(AppStarter(clients, store));
+    Logs().i(
+      '${AppSettings.applicationName.value} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
+    );
+    return;
+  }
+
+  // Started in foreground mode.
+  Logs().i(
+    '${AppSettings.applicationName.value} started in foreground mode. Rendering GUI...',
+  );
+
+  // Догоняем просроченную отложку сразу на старте, не дожидаясь
+  // открытия чата (перезапуск/перезагрузка телефона).
+  // ignore: unawaited_futures
+  flushAllScheduled(store, clients).catchError((_) => 0);
+
+  // Initialize background sync for when FCM/UnifiedPush are unavailable
+  if (PlatformInfos.isAndroid) {
+    try {
+      await BackgroundSyncService().initialize();
+    } catch (e) {
+      Logs().w('Background sync initialization failed (non-critical)', e);
+    }
+  }
+
+  await startGui(clients, store);
+}
+
+/// Fetch the pincode for the applock and start the flutter engine.
+Future<void> startGui(List<Client> clients, SharedPreferences store) async {
+  // Fetch the pin for the applock if existing for mobile applications.
+  String? pin;
+  if (PlatformInfos.isMobile) {
+    try {
+      const storage = FlutterSecureStorage();
+      pin = await storage.read(key: 'im.galmax.app_lock') ??
+          await storage.read(key: 'chat.fluffy.app_lock');
+    } catch (e, s) {
+      Logs().d('Unable to read PIN from Secure storage', e, s);
+    }
+  }
+
+  // Preload first client
+  final firstClient = clients.firstOrNull;
+  await firstClient?.roomsLoading;
+  await firstClient?.accountDataLoading;
+
+  runApp(GAlMaxApp(clients: clients, pincode: pin, store: store));
+}
+
+/// Watches the lifecycle changes to start the application when it
+/// is no longer detached.
+class AppStarter with WidgetsBindingObserver {
+  final List<Client> clients;
+  final SharedPreferences store;
+  bool guiStarted = false;
+
+  AppStarter(this.clients, this.store);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (guiStarted) return;
+    if (state == AppLifecycleState.detached) return;
+
+    Logs().i(
+      '${AppSettings.applicationName.value} switches from the detached background-fetch mode to ${state.name} mode. Rendering GUI...',
+    );
+    // Switching to foreground mode needs to reenable send online sync presence.
+    for (final client in clients) {
+      client.backgroundSync = true;
+      client.syncPresence = PresenceType.online;
+    }
+    startGui(clients, store);
+    // We must make sure that the GUI is only started once.
+    guiStarted = true;
+  }
+}

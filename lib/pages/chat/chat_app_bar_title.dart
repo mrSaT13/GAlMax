@@ -1,0 +1,123 @@
+// SPDX-FileCopyrightText: 2019-Present Christian Kußowski
+// SPDX-FileCopyrightText: 2019-Present Contributors to galmax
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+import 'package:galmax/config/themes.dart';
+import 'package:galmax/l10n/l10n.dart';
+import 'package:galmax/pages/chat/chat.dart';
+import 'package:galmax/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:galmax/utils/sync_status_localization.dart';
+import 'package:galmax/widgets/avatar.dart';
+import 'package:galmax/widgets/presence_builder.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
+
+class ChatAppBarTitle extends StatelessWidget {
+  final ChatController controller;
+  const ChatAppBarTitle(this.controller, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final room = controller.room;
+    if (controller.selectedEvents.isNotEmpty) {
+      return Text(
+        controller.selectedEvents.length.toString(),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onTertiaryContainer,
+        ),
+      );
+    }
+    return InkWell(
+      hoverColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onTap: controller.isArchived
+          ? null
+          : () => GalmaxThemes.isThreeColumnMode(context)
+                ? controller.toggleDisplayChatDetailsColumn()
+                : context.go('/rooms/${room.id}/details'),
+      child: Row(
+        children: [
+          Hero(
+            tag: 'content_banner',
+            child: Avatar(
+              mxContent: room.avatar,
+              name: room.getLocalizedDisplayname(
+                MatrixLocals(L10n.of(context)),
+              ),
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                StreamBuilder(
+                  stream: room.client.onSyncStatus.stream,
+                  builder: (context, snapshot) {
+                    final status =
+                        room.client.onSyncStatus.value ??
+                        const SyncStatusUpdate(SyncStatus.waitingForResponse);
+                    final hide =
+                        GalmaxThemes.isColumnMode(context) ||
+                        (room.client.onSync.value != null &&
+                            status.status != SyncStatus.error &&
+                            room.client.prevBatch != null);
+                    return AnimatedSize(
+                      duration: GalmaxThemes.animationDuration,
+                      child: hide
+                          ? PresenceBuilder(
+                              userId: room.directChatMatrixID,
+                              builder: (context, presence) {
+                                final statusMessage = presence?.statusMsg;
+                                final style = TextStyle(fontSize: 11);
+                                if (statusMessage != null) {
+                                  return Text(statusMessage, style: style);
+                                }
+                                if (presence?.currentlyActive == true) {
+                                  return Text(
+                                    L10n.of(context).currentlyActive,
+                                    style: style,
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            )
+                          : Row(
+                              children: [
+                                SizedBox.square(
+                                  dimension: 10,
+                                  child: CircularProgressIndicator.adaptive(
+                                    strokeWidth: 1,
+                                    value: status.progress,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    status.calcLocalizedString(context),
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

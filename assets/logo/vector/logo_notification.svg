@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Galmax notification icon source: white "G" silhouette on transparent.
+     Status-bar icons must be white + alpha only (system tints them). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g fill="none" stroke="white">
+    <!-- C-ring: circle with a gap on the right for the bar -->
+    <circle cx="96" cy="100" r="62" stroke-width="30"
+            stroke-dasharray="325 65" stroke-dashoffset="-32.5"/>
+  </g>
+  <!-- G bar -->
+  <rect x="96" y="85" width="72" height="30" fill="white"/>
+</svg>

@@ -1,0 +1,25 @@
+GAlMax is an open and feature-rich Matrix messenger app for Android and iOS.
+
+Open
+Open source and open development where everyone can join.
+
+Feature-rich
+GAlMax comes with GIF integration, round video messages, proximity playback, and more.
+
+Cute
+Cute design and many theme settings including a dark mode and custom accent colors.
+
+One-to-one and group chats
+Unlimited groups and direct chats.
+
+Easy
+GAlMax is made as simple to use as possible.
+
+Free
+Free to use for everyone without ads.
+
+Decentralized
+There is no "GAlMax server" you are forced to use. Use the server you find trustworthy or host your own.
+
+Compatible
+Compatible with Element, FluffyChat, Nheko and all Matrix messengers.
