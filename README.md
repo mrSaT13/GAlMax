@@ -32,7 +32,7 @@ Secure Matrix client with end-to-end encryption and calls — fork of [FluffyCha
 
 ### Screenshots
 
-> Add screenshots to `assets/screenshots/` and link them here.
+
 
 ### Quick Start
 
