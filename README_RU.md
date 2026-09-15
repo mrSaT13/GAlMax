@@ -13,6 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 [![Лицензия: AGPL v3](https://img.shields.io/badge/Лицензия-AGPLv3-blue.svg)](LICENSE)
 [![Matrix](https://img.shields.io/badge/Matrix-совместим-brightgreen)](https://matrix.org)
 [![Flutter](https://img.shields.io/badge/Flutter-3.44-02569B?logo=flutter)](https://flutter.dev)
+[![Демо](https://img.shields.io/badge/Демо-nightly-brightgreen?logo=github)](https://mrSaT13.github.io/GAlMax/nightly/)
 
 [English](README.md) | **Русский**
 
