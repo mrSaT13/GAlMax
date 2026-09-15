@@ -5,8 +5,8 @@ SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-# Contributing to FluffyChat
-Contributions are always welcome. Yet we might lack manpower to review all of them in time.
+# Contributing to GAlMax
+Contributions are always welcome. GAlMax is a fork of FluffyChat — guidelines below still apply.
 
 To improve the process please make sure that you read the following guidelines carefully:
 
@@ -19,12 +19,12 @@ To improve the process please make sure that you read the following guidelines c
 5. Every Pull Request should change only one thing. For bigger changes it is often better to split them up in multiple Pull Requests.
 6. [Sign your commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
 7. Format the commit message as [Conventional Commits](https://www.conventionalcommits.org).
-8. For bigger or complex changes (more than a couple of code lines) write an issue or refer to an existing issue and ask for approval from the maintainers (@krille-chan) **before** starting to implement it. This way you reduce the risk that your Pull Request get's declined.
+8. For bigger or complex changes (more than a couple of code lines) write an issue or refer to an existing issue and ask for approval from the maintainers (@mrSaT13) **before** starting to implement it. This way you reduce the risk that your Pull Request get's declined.
 9. Prefer simple and easy to maintain solutions over complexity and fancy ones.
 
 # Code Style
 
-FluffyChat tries to be as minimal as possible even in the code style. We try to keep the code clean, simple and easy to read. The source code of the app is under `/lib` with the main entry point `/lib/main.dart`.
+GAlMax (like FluffyChat) tries to be as minimal as possible even in the code style. We try to keep the code clean, simple and easy to read. The source code of the app is under `/lib` with the main entry point `/lib/main.dart`.
 
 <!-- editorconfig-checker-disable -->
 <!-- prettier-ignore-start -->
