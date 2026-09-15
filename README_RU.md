@@ -4,6 +4,10 @@ SPDX-FileCopyrightText: 2026 Contributors to GAlMax
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
+<p align="center">
+  <img src="assets/logo/img/logo.png" width="120" alt="GAlMax logo" />
+</p>
+
 # GAlMax — Безопасный Matrix-мессенджер
 
 [![Лицензия: AGPL v3](https://img.shields.io/badge/Лицензия-AGPLv3-blue.svg)](LICENSE)
